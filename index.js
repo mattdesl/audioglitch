@@ -17,13 +17,13 @@ document.body.appendChild(canvas);
 
 // const audioSrc = 'assets/audio/31 First Light.mp3';
 // const imgSrc = 'assets/image/monroe.jpg';
-const videoSrc = 'assets/video/budapest_2.mp4';
-const audioSrc = 'assets/video/budapest_2.mp4';
+const videoSrc = 'assets/video/KanyeWest-Fade.mp4';
+const audioSrc = 'assets/video/KanyeWest-Fade.mp4';
 const OfflineAudioCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 
 const audioCtx = new AudioCtx();
-const dpr = 4//window.devicePixelRatio;
+const dpr = 6//window.devicePixelRatio;
 let width, height;
 let x = 0;
 
@@ -32,17 +32,21 @@ const video = createVideo(videoSrc, {
 });
 video.currentTime = 2;
 events.once(video, 'canplaythrough', () => {
-  width = 512;
+  const videoAspect = video.videoWidth / video.videoHeight;
+  width = 1024;
   height = 128;
   canvas.width = width * dpr;
   canvas.height = height * dpr;
+  // canvas.style.width = '100%';
+  // canvas.style.width = `${width}px`;
+  // canvas.style.height = `${height}px`;
   ctx.save();
   ctx.scale(dpr, dpr);
   ctx.fillStyle = 'hsl(0, 0%, 10%)';
   ctx.fillRect(0, 0, width, height);
   document.body.style.background = ctx.fillStyle;
 
-  const fps = 23.98;
+  const fps = 23.976;
   const timeOffset = 1 / fps;
   let currentTime = 0;
   let audio;
@@ -100,22 +104,23 @@ function render (img, audioData, binCount) {
   }
   sum /= audioData.length;
 
-  const sliceWidth = 0.085;
-  const gapWidth = 0.085;
-  const smallGapWidth = (imgWidth * 0.5) / audioData.length;
+  const sliceWidth = 100 / imgWidth;
+  const gapWidth = 200.5 / imgWidth;
+  const smallGapWidth = (100 / imgWidth) //(imgWidth * 0.2) / audioData.length;
   let curX = x;
   for (let i = 0; i < audioData.length; i++) {
     const xpos = curX;
     const n = (audioData[i] / 255) * 2 - 1;
-    let t = Math.abs(n);
+    const alpha = (1 - i / (audioData.length - 1));
+    let t = Math.abs(n) * alpha;
     // const srcX = (xpos + t * width * gapWidth) % img.width;
     const srcX = imgWidth / 2 + i;
     // const srcX = ((imgWidth / 2) + n * 50) % imgWidth;
-    const sliceHeight = t * height;
+    const sliceHeight = t * height * 1.5;
     const sliceY = (height - sliceHeight) / 2;
     const srcSliceHeight = t * imgHeight;
     const srcSliceY = (imgHeight - srcSliceHeight) / 2;
-    ctx.globalAlpha = 0.1
+    ctx.globalAlpha = 0.2;
     ctx.drawImage(img, srcX, srcSliceY, sliceWidth, srcSliceHeight, xpos, sliceY, sliceWidth, sliceHeight);
     curX += smallGapWidth;
   }
